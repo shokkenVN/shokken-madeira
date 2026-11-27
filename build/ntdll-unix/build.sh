@@ -4,6 +4,7 @@ set -e
 BUILD_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$BUILD_DIR/../.." && pwd)"
 WINE_SRC="$REPO_ROOT/wine"
+python3 "$REPO_ROOT/tools/build/prepare-wine.py"
 WINE_BUILD="$WINE_SRC/build-macos"
 SDK=$(xcrun --sdk iphoneos --show-sdk-path)
 OBJ_DIR="$BUILD_DIR/obj"

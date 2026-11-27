@@ -35,6 +35,7 @@
 # tools/wrc (macOS ships 2.3; Homebrew's is used when it is installed).
 set -eu
 R="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+python3 "$R/tools/build/prepare-wine.py"
 TC="$R/toolchains/llvm-mingw-20260421-ucrt-macos-universal/bin"
 export PATH="$TC:$PATH"
 if command -v brew >/dev/null 2>&1; then

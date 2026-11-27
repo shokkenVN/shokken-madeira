@@ -3,6 +3,7 @@ set -euo pipefail
 ROOT="${ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 JOBS="${JOBS:-$(sysctl -n hw.ncpu 2>/dev/null || echo 8)}"
 WINE="$ROOT/wine"
+python3 "$ROOT/tools/build/prepare-wine.py"
 MINGW="$ROOT/toolchains/llvm-mingw-20260421-ucrt-macos-universal/bin"
 export PATH="$MINGW:$PATH"
 

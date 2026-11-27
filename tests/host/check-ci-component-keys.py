@@ -33,6 +33,8 @@ assert templates['mingw'] in cache_lines['i386'], 'both MinGW consumers must use
 
 # Expected dependency edges are independent of the workflow expressions.
 cases = {
+    'wine-opengl-patch': ('patches/wine-opengl-winios.patch', {'wine-host', 'i386', 'dxmt', 'ipa'}),
+    'wine-preparation': ('tools/build/prepare-wine.py', {'wine-host', 'i386', 'dxmt', 'ipa'}),
     'app': ('app/Madeira/Main.swift', {'ipa'}),
     'fex': ('pin:FEX', {'fex', 'ipa'}),
     'wine': ('pin:wine', {'wine-host', 'i386', 'dxmt', 'ipa'}),
