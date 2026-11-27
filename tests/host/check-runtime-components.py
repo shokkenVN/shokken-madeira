@@ -251,6 +251,9 @@ class RuntimeTests(unittest.TestCase):
     def test_wine_temporary_edits_preserve_local_source_on_failure(self):
         script = self.write('build/wine-pe/build-modules.sh',
                             (ROOT / 'build/wine-pe/build-modules.sh').read_bytes())
+        # This fixture exercises temporary Makefile edits and a failed compiler.
+        # OpenGL source preparation is a prerequisite, outside that failure path.
+        self.write('tools/build/prepare-wine.py', b'# Source preparation stub for the temporary-edit fixture.\n')
         source = self.write('wine/dlls/example/Makefile.in',
                             b'MODULE = example.dll\nIMPORTS = kernel32\nDELAYIMPORTS = kernel32\n# local edit\n')
         original = source.read_bytes()
