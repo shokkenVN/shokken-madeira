@@ -2218,6 +2218,7 @@ C_ASSERT( (int)MAV_FMT_U8 == (int)WG_AUDIO_FORMAT_U8 && (int)MAV_FMT_S16 == (int
           && (int)MAV_FMT_S24 == (int)WG_AUDIO_FORMAT_S24LE && (int)MAV_FMT_S32 == (int)WG_AUDIO_FORMAT_S32LE
           && (int)MAV_FMT_F32 == (int)WG_AUDIO_FORMAT_F32LE && (int)MAV_FMT_F64 == (int)WG_AUDIO_FORMAT_F64LE );
 C_ASSERT( (int)MAV_PIX_BGRA == (int)WG_VIDEO_FORMAT_BGRA && (int)MAV_PIX_BGRx == (int)WG_VIDEO_FORMAT_BGRx
+          && (int)MAV_PIX_BGR == (int)WG_VIDEO_FORMAT_BGR
           && (int)MAV_PIX_RGBA == (int)WG_VIDEO_FORMAT_RGBA && (int)MAV_PIX_I420 == (int)WG_VIDEO_FORMAT_I420
           && (int)MAV_PIX_NV12 == (int)WG_VIDEO_FORMAT_NV12 && (int)MAV_PIX_YUY2 == (int)WG_VIDEO_FORMAT_YUY2
           && (int)MAV_PIX_YV12 == (int)WG_VIDEO_FORMAT_YV12 );

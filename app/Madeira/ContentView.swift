@@ -633,12 +633,6 @@ final class MetalBackedView: UIView {
         if HardwareInput.shared.interceptTouches(touches, event, .began) { return }
         guard let touches = tmgFilter(touches, .began) else { return }
         if touchPointerMode { touchModeBegan(touches); return }
-        guard desktopMode else {
-            guard let t = touches.first else { return }
-            let (x, y) = mapTouch(t)
-            postSurfaceTouchDown(x, y)
-            return
-        }
         let now = Date().timeIntervalSinceReferenceDate
         let active = activeTouches(event)
         touchGeneration += 1
@@ -680,12 +674,6 @@ final class MetalBackedView: UIView {
         if HardwareInput.shared.interceptTouches(touches, event, .moved) { return }
         guard let touches = tmgFilter(touches, .moved) else { return }
         if touchPointerMode { touchModeMoved(touches, event); return }
-        guard desktopMode else {
-            guard let t = touches.first else { return }
-            let (x, y) = mapTouch(t)
-            postSurfaceTouchMove(x, y)
-            return
-        }
         let active = activeTouches(event)
         if twoFingerActive {
             guard active.count >= 2 else { return }
@@ -762,12 +750,6 @@ final class MetalBackedView: UIView {
         if HardwareInput.shared.interceptTouches(touches, event, .ended) { return }
         guard let touches = tmgFilter(touches, .ended) else { return }
         if touchPointerMode { touchModeEnded(touches, event); return }
-        guard desktopMode else {
-            guard let t = touches.first else { return }
-            let (x, y) = mapTouch(t)
-            postSurfaceTouchUp(x, y)
-            return
-        }
         let now = Date().timeIntervalSinceReferenceDate
         if twoFingerActive {
             if activeTouches(event).isEmpty {
@@ -806,12 +788,6 @@ final class MetalBackedView: UIView {
         if HardwareInput.shared.interceptTouches(touches, event, .cancelled) { return }
         guard let touches = tmgFilter(touches, .cancelled) else { return }
         if touchPointerMode { touchModeCancelled(touches); return }
-        guard desktopMode else {
-            guard let t = touches.first else { return }
-            let (x, y) = mapTouch(t)
-            postSurfaceTouchUp(x, y)
-            return
-        }
         fputs("[trackpad] CANCELLED (dragActive=\(dragActive))\n", stderr)
         touchGeneration += 1
         if dragActive { postPointer(F_LUP); dragActive = false }

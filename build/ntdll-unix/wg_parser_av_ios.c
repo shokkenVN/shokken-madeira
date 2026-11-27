@@ -136,6 +136,7 @@ enum mav_pixel_format
     MAV_PIX_UNKNOWN = 0,
     MAV_PIX_BGRA = 1,
     MAV_PIX_BGRx = 2,
+    MAV_PIX_BGR = 3,
     MAV_PIX_RGBA = 6,
     MAV_PIX_I420 = 8,
     MAV_PIX_NV12 = 9,
@@ -704,6 +705,7 @@ static const char *mav_pix_name( enum mav_pixel_format fmt )
     {
     case MAV_PIX_BGRA: return "bgra";
     case MAV_PIX_BGRx: return "bgrx";
+    case MAV_PIX_BGR: return "bgr";
     case MAV_PIX_RGBA: return "rgba";
     case MAV_PIX_I420: return "i420";
     case MAV_PIX_NV12: return "nv12";
@@ -752,6 +754,10 @@ static size_t mav_video_layout( enum mav_pixel_format fmt, uint32_t w, uint32_t 
     case MAV_PIX_BGRx:
     case MAV_PIX_RGBA:
         l->stride[0] = w * 4;
+        l->size = (size_t)l->stride[0] * h;
+        break;
+    case MAV_PIX_BGR:
+        l->stride[0] = MAV_ALIGN4( w * 3 );
         l->size = (size_t)l->stride[0] * h;
         break;
     default:
@@ -1779,7 +1785,12 @@ static void mav_convert_picture( struct mav_stream *s, const struct mav_vplanes 
     int yuv = s->vout.fmt == MAV_PIX_NV12 || s->vout.fmt == MAV_PIX_I420
               || s->vout.fmt == MAV_PIX_YV12 || s->vout.fmt == MAV_PIX_YUY2;
 
-    if (cw < w || ch < h)
+    if (s->vout.fmt == MAV_PIX_BGR)
+    {
+        /* Clear padding and any uncovered pixels in a cropped frame. */
+        if (cw < w || ch < h || l->stride[0] != w * 3) memset( dst, 0, l->size );
+    }
+    else if (cw < w || ch < h)
     {
         /* black: Y 16 / chroma 128, or opaque RGB black */
         if (s->vout.fmt == MAV_PIX_YUY2)
@@ -1837,10 +1848,12 @@ static void mav_convert_picture( struct mav_stream *s, const struct mav_vplanes 
         break;
     case MAV_PIX_BGRA:
     case MAV_PIX_BGRx:
+    case MAV_PIX_BGR:
     case MAV_PIX_RGBA:
     {
         struct mav_yuv_coefs c;
         int ri = s->vout.fmt == MAV_PIX_RGBA ? 0 : 2, bi = 2 - ri;
+        unsigned int bytes_per_pixel = s->vout.fmt == MAV_PIX_BGR ? 3 : 4;
         mav_yuv_coefs( s->bt709, src->full_range, &c );
         for (y = 0; y < ch; y++)
         {
@@ -1850,10 +1863,11 @@ static void mav_convert_picture( struct mav_stream *s, const struct mav_vplanes 
             {
                 int yy = (yr[x] - c.yoff) * c.y + 32768;
                 int u = uv[(x & ~1u)] - 128, v = uv[(x & ~1u) + 1] - 128;
-                o[4 * x + ri] = mav_clip8( (yy + c.rv * v) >> 16 );
-                o[4 * x + 1] = mav_clip8( (yy - c.gu * u - c.gv * v) >> 16 );
-                o[4 * x + bi] = mav_clip8( (yy + c.bu * u) >> 16 );
-                o[4 * x + 3] = 0xff;
+                uint8_t *pixel = o + bytes_per_pixel * x;
+                pixel[ri] = mav_clip8( (yy + c.rv * v) >> 16 );
+                pixel[1] = mav_clip8( (yy - c.gu * u - c.gv * v) >> 16 );
+                pixel[bi] = mav_clip8( (yy + c.bu * u) >> 16 );
+                if (bytes_per_pixel == 4) pixel[3] = 0xff;
             }
         }
         break;

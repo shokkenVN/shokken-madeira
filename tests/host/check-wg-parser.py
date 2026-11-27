@@ -718,6 +718,7 @@ static int check_picture( const uint8_t *buf, uint32_t size, enum mav_pixel_form
     {
     case MAV_PIX_NV12: case MAV_PIX_I420: case MAV_PIX_YV12: CHECK( l.stride[0] == ((W + 3) & ~3) && size == W * H * 3 / 2, "%s stride", what ); break;
     case MAV_PIX_YUY2: CHECK( l.stride[0] == ((W * 2 + 3) & ~3), "%s stride", what ); break;
+    case MAV_PIX_BGR: CHECK( l.stride[0] == ((W * 3 + 3) & ~3), "%s stride", what ); break;
     default: CHECK( l.stride[0] == W * 4, "%s stride", what ); break;
     }
     for (y = 0; y < H; y++)
@@ -750,14 +751,14 @@ static int check_picture( const uint8_t *buf, uint32_t size, enum mav_pixel_form
                 /* BT.601, limited range: the untagged, sub-720-line default */
                 double yy = 1.164383 * (Y - 16), r = yy + 1.596027 * (V - 128),
                        g = yy - 0.391762 * (U - 128) - 0.812968 * (V - 128), b = yy + 2.017232 * (U - 128);
-                const uint8_t *px = buf + ry * l.stride[0] + 4 * x;
+                const uint8_t *px = buf + ry * l.stride[0] + (fmt == MAV_PIX_BGR ? 3 : 4) * x;
                 int R = fmt == MAV_PIX_RGBA ? px[0] : px[2], G = px[1], B = fmt == MAV_PIX_RGBA ? px[2] : px[0];
                 int er = abs( R - (int)lround( fmin( 255, fmax( 0, r ) ) ) ), eg = abs( G - (int)lround( fmin( 255, fmax( 0, g ) ) ) ),
                     eb = abs( B - (int)lround( fmin( 255, fmax( 0, b ) ) ) );
                 if (er > maxerr) maxerr = er;
                 if (eg > maxerr) maxerr = eg;
                 if (eb > maxerr) maxerr = eb;
-                CHECK( px[3] == 0xff, "%s alpha", what );
+                if (fmt != MAV_PIX_BGR) CHECK( px[3] == 0xff, "%s alpha", what );
                 break;
             }
             }
@@ -911,6 +912,7 @@ static int test_mp4_formats( const uint8_t *mp4, size_t size )
         { MAV_PIX_NV12, 0, "nv12" }, { MAV_PIX_I420, 0, "i420" }, { MAV_PIX_YV12, 0, "yv12" }, { MAV_PIX_YUY2, 0, "yuy2" },
         { MAV_PIX_BGRx, 0, "bgrx" }, { MAV_PIX_BGRA, 0, "bgra" }, { MAV_PIX_RGBA, 0, "rgba" },
         { MAV_PIX_BGRx, 1, "bgrx bottom-up" }, { MAV_PIX_NV12, 1, "nv12 bottom-up" },
+        { MAV_PIX_BGR, 0, "bgr24" }, { MAV_PIX_BGR, 1, "bgr24 bottom-up" },
     };
     struct mav_parser *p = mav_create( 0 ); struct source s; struct mav_stream_info vi; unsigned int i;
 
